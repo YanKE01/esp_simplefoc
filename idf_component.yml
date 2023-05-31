@@ -3,9 +3,8 @@ dependencies:
     version: '>=5.0'
 
 description: Espressif's additions to SimpleFOC
-documentation: https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/api-reference/peripherals/usb_device.html
 targets:
-- esp32s2
+- esp32
 - esp32s3
 url: https://github.com/simplefoc/Arduino-FOC
-version: 1.2.2
+version: 0.0.1
