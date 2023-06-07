@@ -114,7 +114,7 @@ public:
     // returns the number of characters placed in the buffer (0 means no valid data found)
 
     // Arduino String functions to be added here
-    //virtual String readString();
+    String readString();
     String readStringUntil(char terminator);
 
 protected:

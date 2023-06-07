@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 #include "esp-hal-gpio.h"
 
 static IoRecord ioRecord[GPIO_NUM_MAX]; // record all gpio config

@@ -17,6 +17,7 @@ HardwareSerial Serial(UART_NUM_0, 115200, GPIO_NUM_1, GPIO_NUM_3);
 HardwareSerial Serial(UART_NUM_0, 115200, GPIO_NUM_43, GPIO_NUM_44);
 #endif
 
+
 HardwareSerial::HardwareSerial(int uart_num, int baud_rate, gpio_num_t tx, gpio_num_t rx)
 {
     this->_uart_num = uart_num;

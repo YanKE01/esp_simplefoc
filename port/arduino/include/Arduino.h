@@ -12,8 +12,6 @@
 #include "esp-hal-gpio.h"
 #include "esp-hal-mcpwm.h"
 
-
-
 #define NOP() asm volatile("nop")
 #define PI 3.14159265358979f
 
@@ -25,6 +23,7 @@ typedef unsigned int word;
 #include "Stream.h"
 #include "Printable.h"
 #include "Print.h"
+#include "WCharacter.h"
 
 enum PINMODE
 {

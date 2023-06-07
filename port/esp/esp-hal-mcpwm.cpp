@@ -6,9 +6,8 @@
 
 #include "esp-hal-mcpwm.h"
 #include "esp_log.h"
+#include "esp-hal-adc.h"
 #include "../../../Arduino-FOC/src/drivers/hardware_api.h"
-
-const char *TEST_TAG = "test";
 
 /**
  * @description: initialize three pwm drivers
@@ -89,6 +88,7 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
     }
 
     // Enable and start timer
+    mcpwm_timer_register_event_callbacks(timer, &mcpwm_timer_cb, NULL); // bind isr handler
     ESP_ERROR_CHECK(mcpwm_timer_enable(timer));
     ESP_ERROR_CHECK(mcpwm_timer_start_stop(timer, MCPWM_TIMER_START_NO_STOP));
 

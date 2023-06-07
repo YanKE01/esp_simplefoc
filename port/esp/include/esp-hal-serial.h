@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 #ifndef ESP_HAL_SERIAL_H
 #define ESP_HAL_SERIAL_H
 
