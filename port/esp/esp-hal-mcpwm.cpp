@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 #include "esp-hal-mcpwm.h"
 #include "esp_log.h"
 #include "../../../Arduino-FOC/src/drivers/hardware_api.h"
@@ -59,7 +58,7 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
     // Create comparator and generator from the operator
     mcpwm_cmpr_handle_t comparator[3];
     mcpwm_comparator_config_t comparator_config;
-    comparator_config.flags.update_cmp_on_tez = true;
+    comparator_config.flags.update_cmp_on_tep = true;
 
     for (int i = 0; i < 3; i++)
     {
@@ -96,6 +95,7 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
     ESP32MCPWMDriverParams *params = new ESP32MCPWMDriverParams{};
     params->pwm_frequency = pwm_frequency;
     params->pwm_timeperiod = timer_config.period_ticks;
+    params->timer = timer;
     for (int i = 0; i < 3; i++)
     {
         params->comparator[i] = comparator[i];

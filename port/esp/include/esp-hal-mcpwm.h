@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 #ifndef ESP_HAL_MCPWM_H
 #define ESP_HAL_MCPWM_H
 
@@ -20,6 +19,7 @@ typedef struct ESP32MCPWMDriverParams
     long pwm_frequency;
     uint32_t pwm_timeperiod;
     mcpwm_cmpr_handle_t comparator[6]; // A maximum of six comparators can be set
+    mcpwm_timer_handle_t timer;        // used for timer isr function
 } ESP32MCPWMDriverParams;
 
 #endif
