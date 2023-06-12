@@ -10,7 +10,6 @@
 #include "freertos/task.h"
 #include "esp_timer.h"
 
-
 /**
  * @description: get time in ms since boot.
  * @return {*}

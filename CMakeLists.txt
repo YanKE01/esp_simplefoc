@@ -13,8 +13,11 @@ set(SRC_FILES   "Arduino-FOC/src/common/foc_utils.cpp"
 
                 "Arduino-FOC/src/drivers/BLDCDriver3PWM.cpp"
                 "Arduino-FOC/src/drivers/BLDCDriver6PWM.cpp"
+
                 "Arduino-FOC/src/sensors/GenericSensor.cpp"
                 "Arduino-FOC/src/sensors/Encoder.cpp"
+                "Arduino-FOC/src/sensors/HallSensor.cpp"
+
                 "Arduino-FOC/src/BLDCMotor.cpp"
 
                 "port/esp/esp-hal-misc.cpp"
@@ -35,6 +38,9 @@ set(INC_FILES   "port/arduino/include/"
                 "Arduino-FOC/src/"
 ) 
 
+set(IGNORE_FILES    "Arduino-FOC/src/sensors/Encoder.cpp"
+                    "Arduino-FOC/src/sensors/HallSensor.cpp"
+                    "port/esp/esp-hal-adc.cpp")
 
 
 idf_component_register(SRCS ${SRC_FILES}
@@ -43,13 +49,8 @@ idf_component_register(SRCS ${SRC_FILES}
 )
 
 
-set_source_files_properties( "Arduino-FOC/src/sensors/Encoder.cpp"
-    PROPERTIES COMPILE_FLAGS
-    -Wno-volatile 
+set_source_files_properties( ${IGNORE_FILES}
+    PROPERTIES
+    COMPILE_OPTIONS "-Wno-volatile;-Wno-deprecated-enum-float-conversion;-Wno-missing-field-initializers"
 )
 
-
-set_source_files_properties( "port/esp/esp-hal-adc.cpp"
-    PROPERTIES COMPILE_FLAGS
-    -Wno-missing-field-initializers
-)

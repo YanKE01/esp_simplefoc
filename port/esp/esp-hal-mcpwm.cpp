@@ -88,7 +88,7 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
     }
 
     // Enable and start timer
-    mcpwm_timer_register_event_callbacks(timer, &mcpwm_timer_cb, NULL); // bind isr handler
+    mcpwm_timer_register_event_callbacks(timer, &mcpwm_timer_cb, NULL); // bind isr handler, but no user data
     ESP_ERROR_CHECK(mcpwm_timer_enable(timer));
     ESP_ERROR_CHECK(mcpwm_timer_start_stop(timer, MCPWM_TIMER_START_NO_STOP));
 
