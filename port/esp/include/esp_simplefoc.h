@@ -7,6 +7,9 @@
 #ifndef ESP_SIMPLE_FOC_H
 #define ESP_SIMPLE_FOC_H
 
+
+
+#include "Arduino.h"
 #include "../../../Arduino-FOC/src/BLDCMotor.h"
 #include "../../../Arduino-FOC/src/drivers/BLDCDriver3PWM.h"
 #include "../../../Arduino-FOC/src/communication/SimpleFOCDebug.h"
@@ -14,5 +17,8 @@
 #include "../../../Arduino-FOC/src/sensors/GenericSensor.h"
 #include "../../../Arduino-FOC/src/current_sense/GenericCurrentSense.h"
 #include "../../../Arduino-FOC/src/current_sense/LowsideCurrentSense.h"
+
+
+
 
 #endif

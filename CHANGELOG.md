@@ -11,3 +11,9 @@
 ### Enhancements:
 * FOC:
     * Add current collection to idf-simplefoc.
+
+## V0.0.3 - 2023-6-26
+
+### Enhancements:
+* FOC:
+    * Fix mcpwm driver for esp-simplefoc.

@@ -24,7 +24,6 @@ set(SRC_FILES   "Arduino-FOC/src/common/foc_utils.cpp"
                 "port/esp/esp-hal-serial.cpp"
                 "port/esp/esp-hal-gpio.cpp"
                 "port/esp/esp-hal-mcpwm.cpp"
-                "port/esp/esp-hal-adc.cpp"
                 
                 "port/arduino/Print.cpp"
                 "port/arduino/Stream.cpp"                
@@ -32,20 +31,21 @@ set(SRC_FILES   "Arduino-FOC/src/common/foc_utils.cpp"
 
 
 set(INC_FILES   "port/arduino/include/"
-                "port/esp/include"
+                "port/esp/include/"
                 "Arduino-FOC/src/common/"
-                "Arduino-FOC/src/common/base_classes"
+                "Arduino-FOC/src/common/base_classes/"
                 "Arduino-FOC/src/"
 ) 
 
 set(IGNORE_FILES    "Arduino-FOC/src/sensors/Encoder.cpp"
                     "Arduino-FOC/src/sensors/HallSensor.cpp"
-                    "port/esp/esp-hal-adc.cpp")
+                    "port/esp/esp-hal-mcpwm.cpp"
+                    )
 
 
 idf_component_register(SRCS ${SRC_FILES}
                     INCLUDE_DIRS ${INC_FILES}
-                    REQUIRES esp_timer driver esp_rom esp_adc
+                    REQUIRES driver esp_rom esp_timer 
 )
 
 
