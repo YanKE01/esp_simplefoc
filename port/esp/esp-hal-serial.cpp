@@ -5,76 +5,124 @@
  */
 
 #include "esp-hal-serial.h"
+#include "esp_log.h"
+
+const char *ESP_HAL_SERIAL_TAG = "ESP HAL SERIAL";
+
+HardwareSerial Serial;
 
 /**
- * ESP32-S-Devkitc default serial port: tx:1 rx:3
- * ESP32-S3-Devkitc default serial port: tx:43 rx:44
- */
-
-#if CONFIG_IDF_TARGET_ESP32
-HardwareSerial Serial(UART_NUM_0, 115200, GPIO_NUM_1, GPIO_NUM_3);
-#elif CONFIG_IDF_TARGET_ESP32S3
-HardwareSerial Serial(UART_NUM_0, 115200, GPIO_NUM_43, GPIO_NUM_44);
-#endif
-
-
-HardwareSerial::HardwareSerial(int uart_num, int baud_rate, gpio_num_t tx, gpio_num_t rx)
-{
-    this->_uart_num = uart_num;
-    this->_rxBufferSize = 256;
-    this->_txBufferSize = 0;
-
-    uart_config_t uart_config = {
-        .baud_rate = baud_rate,
-        .data_bits = UART_DATA_8_BITS,
-        .parity = UART_PARITY_DISABLE,
-        .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-        .rx_flow_ctrl_thresh = 0,
-        .source_clk = UART_SCLK_APB,
-    };
-
-    ESP_ERROR_CHECK(uart_driver_install(this->_uart_num, this->_rxBufferSize, 0, 0, NULL, 0));
-    ESP_ERROR_CHECK(uart_param_config(this->_uart_num, &uart_config));
-    ESP_ERROR_CHECK(uart_set_pin(this->_uart_num, tx, rx, -1, -1));
-}
-
-HardwareSerial::~HardwareSerial()
-{
-    ESP_ERROR_CHECK(uart_driver_delete(_uart_num));
-}
-
-/**
- * @description: set rx buffer size
- * @param {size_t} new_size
+ * @description: HardwareSerial constructor.
  * @return {*}
  */
-size_t HardwareSerial::setRxBufferSize(size_t new_size)
+HardwareSerial::HardwareSerial()
 {
-    if (new_size <= SOC_UART_FIFO_LEN)
-    {
-        return 0; // ESP32, S2, S3 and C3 means higher than 128
-    }
-    _rxBufferSize = new_size;
+    _rxPin = -1;
+    _txPin = -1;
+    _ctsPin = -1;
+    _rtsPin = -1;
+    _rxBufferSize = 256;
+    _txBufferSize = 0;
+}
+
+/**
+ * @description: HardwareSerial destructor.
+ * @return {*}
+ */
+HardwareSerial::~HardwareSerial()
+{
+
+    end();
+}
+
+/**
+ * @description: Return hardwareSerial rx buffer size.
+ * @return {*}
+ */
+int HardwareSerial::getRxBuffer()
+{
     return _rxBufferSize;
 }
 
 /**
- * @description: set tx buffer size
- * @param {size_t} new_size
+ * @description: Return harewareSerial uart_port.
  * @return {*}
  */
-size_t HardwareSerial::setTxBufferSize(size_t new_size)
+uart_port_t HardwareSerial::getUartPort()
 {
-    if (new_size <= SOC_UART_FIFO_LEN)
-    {
-        return 0; // ESP32, S2, S3 and C3 means higher than 128
-    }
-    _txBufferSize = new_size;
-    return _txBufferSize;
+    return _uart_num;
 }
+
 /**
- * @description: serial write
+ * @description: HardwareSerial begin function. support separate setting of serial port and IO.
+ * @param {unsigned long} baud
+ * @param {uart_port_t} uart_num
+ * @param {int} tx_io
+ * @param {int} rx_io
+ * @param {uart_word_length_t} wordLength
+ * @param {uart_parity_t} parity
+ * @param {uart_stop_bits_t} stopBits
+ * @param {int8_t} rxPin
+ * @param {int8_t} txPin
+ * @param {bool} invert
+ * @param {unsigned long} timeout_ms
+ * @param {uint8_t} rxfifo_full_thrhd
+ * @return {*}
+ */
+void HardwareSerial::begin(unsigned long baud, uart_port_t uart_num, int tx_io, int rx_io, uart_word_length_t wordLength, uart_parity_t parity, uart_stop_bits_t stopBits, int8_t rxPin, int8_t txPin, bool invert, unsigned long timeout_ms, uint8_t rxfifo_full_thrhd)
+{
+    _uart_num = uart_num;
+    if (!uart_is_driver_installed(_uart_num))
+    {
+        _uart_config.baud_rate = baud;
+        _uart_config.data_bits = wordLength;
+        _uart_config.parity = parity;
+        _uart_config.stop_bits = stopBits;
+        _uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
+        _uart_config.source_clk = UART_SCLK_DEFAULT;
+
+        uart_driver_install(_uart_num, _rxBufferSize * 2, 0, 0, NULL, 0);
+        uart_param_config(_uart_num, &_uart_config);
+        uart_set_pin(_uart_num, tx_io, rx_io, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    }
+}
+
+/**
+ * @description: Delete hardwareSerial
+ * @return {*}
+ */
+void HardwareSerial::end()
+{
+    if (uart_is_driver_installed(_uart_num))
+    {
+        uart_driver_delete(_uart_num);
+    }
+}
+
+/**
+ * @description: Get hardwareSerial buffer data size.
+ * @return {*}
+ */
+int HardwareSerial::available()
+{
+    size_t available;
+
+    uart_get_buffered_data_len(_uart_num, &available);
+
+    return available;
+}
+
+/**
+ * @description: Empty function.
+ * @return {*}
+ */
+int HardwareSerial::peek()
+{
+    return 1;
+}
+
+/**
+ * @description: HardwareSerial write function.
  * @param {uint8_t} c
  * @return {*}
  */
@@ -85,7 +133,7 @@ size_t HardwareSerial::write(uint8_t c)
 }
 
 /**
- * @description: serial write buffer
+ * @description: HardwareSerial write function.
  * @param {uint8_t} *buffer
  * @param {size_t} size
  * @return {*}
@@ -97,58 +145,37 @@ size_t HardwareSerial::write(const uint8_t *buffer, size_t size)
 }
 
 /**
- * @description: judge if serial is available
+ * @description: HardwareSerial read function.
  * @return {*}
  */
-int HardwareSerial::available(void)
-{
-    return uart_is_driver_installed(_uart_num);
-}
-
-/**
- * @description: serial peek function not defined
- * @return {*}
- */
-int HardwareSerial::peek(void)
-{
-    return 1;
-}
-
-/**
- * @description: serial read one byte function
- * @return {*}
- */
-int HardwareSerial::read(void)
+int HardwareSerial::read()
 {
     uint8_t c = 0;
-    if (uart_read_bytes(_uart_num, &c, 1, 0) == 1)
+    if (uart_read_bytes(_uart_num, &c, 1, 10 / portTICK_PERIOD_MS) == 1)
     {
         return c;
     }
-    else
-    {
-        return -1;
-    }
+    return -1;
 }
 
 /**
- * @description: serial read buffer function
+ * @description: HardwareSerial read function.
  * @param {uint8_t} *buffer
  * @param {size_t} size
  * @return {*}
  */
 size_t HardwareSerial::read(uint8_t *buffer, size_t size)
 {
-    return uart_read_bytes(_uart_num, buffer, size, 0);
+    return uart_read_bytes(_uart_num, buffer, size, 10 / portTICK_PERIOD_MS);
 }
 
 /**
- * @description: serial read bytes function
+ * @description: HardwareSerial read function.
  * @param {uint8_t} *buffer
  * @param {size_t} length
  * @return {*}
  */
 size_t HardwareSerial::readBytes(uint8_t *buffer, size_t length)
 {
-    return uart_read_bytes(_uart_num, buffer, length, (uint32_t)getTimeout());
+    return uart_read_bytes(_uart_num, buffer, length, 10 / portTICK_PERIOD_MS);
 }

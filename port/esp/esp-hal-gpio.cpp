@@ -9,7 +9,7 @@
 static IoRecord ioRecord[GPIO_NUM_MAX]; // record all gpio config
 
 /**
- * @description: set gpio pin mode
+ * @description: Set GPIO Mode. Arduino style function.
  * @param {uint8_t} pin
  * @param {uint8_t} mode
  * @return {*}
@@ -55,7 +55,7 @@ void pinMode(uint8_t pin, uint8_t mode)
 }
 
 /**
- * @description: write gpio pin level
+ * @description: Write GPIO Value. Arduino style function.
  * @param {uint8_t} pin
  * @param {uint8_t} val
  * @return {*}
@@ -70,7 +70,7 @@ void digitalWrite(uint8_t pin, uint8_t val)
 }
 
 /**
- * @description: read gpio pin level
+ * @description: Read GPIO Value. Arduino style function.
  * @param {uint8_t} pin
  * @return {*}
  */
@@ -80,7 +80,7 @@ int digitalRead(uint8_t pin)
 }
 
 /**
- * @description: only return pin number, interrupt process in function <attachInterrupt>
+ * @description:  Set GPIO Interrupt. Arduino style function, only return pin number, interrupt process in function <attachInterrupt>
  * @param {uint8_t} pin
  * @return {*}
  */
@@ -90,7 +90,7 @@ uint8_t digitalPinToInterrupt(uint8_t pin)
 }
 
 /**
- * @description: start gpio interrupt
+ * @description: Bind funtion to GPIO Interrupt. Arduino style function.
  * @param {uint8_t} pin
  * @return {*}
  */
@@ -119,6 +119,6 @@ void attachInterrupt(uint8_t pin, void (*handler)(void), int mode)
     gpio_config(&ioRecord[pin].conf);
 
     gpio_install_isr_service(0);
-    
+
     gpio_isr_handler_add(ioRecord[pin].number, gpio_isr_t(handler), (void *)ioRecord[pin].number);
 }

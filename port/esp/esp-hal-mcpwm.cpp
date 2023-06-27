@@ -9,7 +9,7 @@
 #include "../../../Arduino-FOC/src/drivers/hardware_api.h"
 
 #if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
-// using idf 4.4 mcpwm driver
+// Using ESP_IDF 4.4.* MCPWM driver.
 
 bldc_3pwm_motor_slots_t esp32_bldc_3pwm_motor_slots[4] = {
     {_EMPTY_SLOT, &MCPWM0, MCPWM_UNIT_0, MCPWM_OPR_A, MCPWM0A, MCPWM1A, MCPWM2A}, // 1st motor will be MCPWM0 channel A
@@ -39,7 +39,7 @@ stepper_2pwm_motor_slots_t esp32_stepper_2pwm_motor_slots[4] = {
 };
 
 /**
- * @description: configuring high frequency pwm timer
+ * @description: Configuring high frequency pwm timer.
  * @param {long} pwm_frequency
  * @param {mcpwm_dev_t} *mcpwm_num
  * @param {mcpwm_unit_t} mcpwm_unit
@@ -121,7 +121,7 @@ void _configureTimerFrequency(long pwm_frequency, mcpwm_dev_t *mcpwm_num, mcpwm_
 }
 
 /**
- * @description: function setting the high pwm frequency to the supplied pins
+ * @description: Setting the high pwm frequency to the supplied pins.
  * @param {long} pwm_frequency
  * @param {int} pinA
  * @param {int} pinB
@@ -183,7 +183,7 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
 }
 
 /**
- * @description: BLDC motor - 3PWM setting
+ * @description: Write 3PWM Duty.
  * @param {float} dc_a
  * @param {float} dc_b
  * @param {float} dc_c
@@ -200,8 +200,16 @@ void _writeDutyCycle3PWM(float dc_a, float dc_b, float dc_c, void *params)
 }
 
 #else
-// using idf5.0 mcpwm driver
+// Using ESP_IDF 5.* MCPWM driver.
 
+/**
+ * @description: Configure three pwm channels.
+ * @param {long} pwm_frequency
+ * @param {int} pinA
+ * @param {int} pinB
+ * @param {int} pinC
+ * @return {*}
+ */
 void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const int pinC)
 {
     if (!pwm_frequency || !_isset(pwm_frequency))
@@ -301,7 +309,7 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
 }
 
 /**
- * @description: write 3pwm
+ * @description: Write PWM Duty.
  * @param {float} dc_a
  * @param {float} dc_b
  * @param {float} dc_c

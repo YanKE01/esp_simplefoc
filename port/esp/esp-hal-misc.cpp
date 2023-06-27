@@ -11,7 +11,7 @@
 #include "esp_timer.h"
 
 /**
- * @description: get time in ms since boot.
+ * @description: Get time in ms since boot.
  * @return {*}
  */
 unsigned long micros()
@@ -20,7 +20,7 @@ unsigned long micros()
 }
 
 /**
- * @description: get time in us since boot.
+ * @description: Get time in us since boot.
  * @return {*}
  */
 unsigned long millis()
@@ -49,7 +49,7 @@ void delayMicroseconds(uint32_t us)
 }
 
 /**
- * @description: rtos delay function
+ * @description: Rtos delay function.
  * @param {uint32_t} ms
  * @return {*}
  */
@@ -59,7 +59,7 @@ void delay(uint32_t ms)
 }
 
 /**
- * @description: min function
+ * @description: Min function.
  * @param {float} a
  * @param {float} b
  * @return {*}

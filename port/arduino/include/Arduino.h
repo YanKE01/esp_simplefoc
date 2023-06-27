@@ -19,7 +19,7 @@ typedef bool boolean;
 typedef uint8_t byte;
 typedef unsigned int word;
 
-//#include "WString.h"
+#include "WString.h"
 #include "Stream.h"
 #include "Printable.h"
 #include "Print.h"
@@ -45,7 +45,6 @@ enum PININTERRUPT
     FALLING,    // high->low
     CHANGE,     // high->low or low->high
 };
-
 
 
 #endif
