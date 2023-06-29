@@ -1,0 +1,1 @@
+#include "esp-hal-adc.h"

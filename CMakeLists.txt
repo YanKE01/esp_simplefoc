@@ -1,5 +1,5 @@
 set(SRC_FILES
-    "Arduino-FOC/src/common/foc_utils.cpp"
+    #"Arduino-FOC/src/common/foc_utils.cpp"
     "Arduino-FOC/src/common/pid.cpp"
     "Arduino-FOC/src/common/time_utils.cpp"
     "Arduino-FOC/src/common/lowpass_filter.cpp"
@@ -19,6 +19,8 @@ set(SRC_FILES
     "port/esp/esp-hal-serial.cpp"
     "port/esp/esp-hal-gpio.cpp"
     "port/esp/esp-hal-mcpwm.cpp"
+    "port/esp/esp-hal-adc.cpp"
+    "port/esp/esp-fast-math.cpp"
     "port/arduino/Print.cpp"
     "port/arduino/Stream.cpp")
 

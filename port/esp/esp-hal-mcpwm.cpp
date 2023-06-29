@@ -8,6 +8,8 @@
 #include "esp_log.h"
 #include "../../../Arduino-FOC/src/drivers/hardware_api.h"
 
+int group_id = 0;
+
 #if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
 // Using ESP_IDF 4.4.* MCPWM driver.
 
@@ -223,7 +225,7 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
 
     mcpwm_timer_handle_t timer = NULL;
     mcpwm_timer_config_t timer_config = {
-        .group_id = 0,
+        .group_id = group_id,
         .clk_src = MCPWM_TIMER_CLK_SRC_DEFAULT,
         .resolution_hz = _PWM_TIMEBASE_RESOLUTION_HZ,
         .count_mode = MCPWM_TIMER_COUNT_MODE_UP_DOWN, // MCPWM_TIMER_COUNT_MODE_UP
@@ -233,7 +235,7 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
 
     mcpwm_oper_handle_t oper[3];
     mcpwm_operator_config_t operator_config = {
-        .group_id = 0, // operator must be in the same group to the timer
+        .group_id = group_id, // operator must be in the same group to the timer
     };
 
     for (int i = 0; i < 3; i++)
@@ -297,13 +299,17 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
 
     // copy params
     ESP32MCPWMDriverParams *params = new ESP32MCPWMDriverParams{};
+    params->group_id = group_id;
     params->pwm_frequency = pwm_frequency;
     params->pwm_timeperiod = (uint32_t)(timer_config.period_ticks / 2.0f);
     params->timer = timer;
+
     for (int i = 0; i < 3; i++)
     {
         params->comparator[i] = comparator[i];
     }
+
+    group_id++;
 
     return params;
 }
@@ -318,6 +324,7 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
  */
 void _writeDutyCycle3PWM(float dc_a, float dc_b, float dc_c, void *params)
 {
+
     ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(((ESP32MCPWMDriverParams *)params)->comparator[0], (uint32_t)((uint32_t)(((ESP32MCPWMDriverParams *)params)->pwm_timeperiod * dc_a))));
     ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(((ESP32MCPWMDriverParams *)params)->comparator[1], (uint32_t)((uint32_t)(((ESP32MCPWMDriverParams *)params)->pwm_timeperiod * dc_b))));
     ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(((ESP32MCPWMDriverParams *)params)->comparator[2], (uint32_t)((uint32_t)(((ESP32MCPWMDriverParams *)params)->pwm_timeperiod * dc_c))));

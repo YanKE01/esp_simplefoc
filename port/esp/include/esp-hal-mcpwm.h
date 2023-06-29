@@ -102,10 +102,11 @@ typedef struct ESP32MCPWMDriverParams
 
 typedef struct ESP32MCPWMDriverParams
 {
+    int group_id = -1;
     long pwm_frequency;
     uint32_t pwm_timeperiod;
-    mcpwm_cmpr_handle_t comparator[6]; // A maximum of six comparators can be set
-    mcpwm_timer_handle_t timer;        // used for timer isr function
+    mcpwm_cmpr_handle_t comparator[3]; // A maximum of six comparators can be set
+    mcpwm_timer_handle_t timer;     // used for timer isr function
 } ESP32MCPWMDriverParams;
 
 #endif
