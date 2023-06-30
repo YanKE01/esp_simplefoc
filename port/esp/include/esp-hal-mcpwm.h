@@ -95,6 +95,8 @@ typedef struct ESP32MCPWMDriverParams
 #else
 
 #include "driver/mcpwm_prelude.h"
+#include "driver/ledc.h"
+#include "esp_err.h"
 
 #define _PWM_FREQUENCY 40000                           // default
 #define _PWM_FREQUENCY_MAX 100000                      // max
@@ -102,11 +104,13 @@ typedef struct ESP32MCPWMDriverParams
 
 typedef struct ESP32MCPWMDriverParams
 {
-    int group_id = -1;
     long pwm_frequency;
     uint32_t pwm_timeperiod;
+    int group_id = -1;                 // The maximum number supported is 4
     mcpwm_cmpr_handle_t comparator[3]; // A maximum of six comparators can be set
-    mcpwm_timer_handle_t timer;     // used for timer isr function
+    mcpwm_timer_handle_t timer;        // used for timer isr function
+    ledc_channel_t ledc_channel[3];    // using ledc driver to expand motor control
+    bool is_config;                    // motor is config
 } ESP32MCPWMDriverParams;
 
 #endif

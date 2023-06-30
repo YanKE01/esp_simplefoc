@@ -204,6 +204,13 @@ void _writeDutyCycle3PWM(float dc_a, float dc_b, float dc_c, void *params)
 #else
 // Using ESP_IDF 5.* MCPWM driver.
 
+#define LEDC_TIMER LEDC_TIMER_0
+#define LEDC_MODE LEDC_LOW_SPEED_MODE
+#define LEDC_DUTY_RES LEDC_TIMER_11_BIT // Set duty resolution to 11 bits
+#define LEDC_DUTY (2047)                // Duty Max = 2^11 = 2048
+#define LEDC_FREQUENCY (20 * 1000)      // Frequency in Hertz. Set frequency at 30 kHz
+ledc_channel_t channels[2][3] = {{LEDC_CHANNEL_0, LEDC_CHANNEL_1, LEDC_CHANNEL_2}, {LEDC_CHANNEL_3, LEDC_CHANNEL_4, LEDC_CHANNEL_5}};
+
 /**
  * @description: Configure three pwm channels.
  * @param {long} pwm_frequency
@@ -303,6 +310,7 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
     params->pwm_frequency = pwm_frequency;
     params->pwm_timeperiod = (uint32_t)(timer_config.period_ticks / 2.0f);
     params->timer = timer;
+    params->is_config = 1;
 
     for (int i = 0; i < 3; i++)
     {

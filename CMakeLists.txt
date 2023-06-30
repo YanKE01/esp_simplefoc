@@ -1,5 +1,5 @@
 set(SRC_FILES
-    #"Arduino-FOC/src/common/foc_utils.cpp"
+    # "Arduino-FOC/src/common/foc_utils.cpp"
     "Arduino-FOC/src/common/pid.cpp"
     "Arduino-FOC/src/common/time_utils.cpp"
     "Arduino-FOC/src/common/lowpass_filter.cpp"
@@ -29,7 +29,7 @@ set(INC_FILES
     "Arduino-FOC/src/common/base_classes/" "Arduino-FOC/src/")
 
 set(IGNORE_FILES
-    "Arduino-FOC/src/sensors/Encoder.cpp"
+    "Arduino-FOC/src/sensors/Encoder.cpp" "port/esp/esp-hal-adc.cpp"
     "Arduino-FOC/src/sensors/HallSensor.cpp" "port/esp/esp-hal-mcpwm.cpp")
 
 idf_component_register(
@@ -40,7 +40,8 @@ idf_component_register(
   REQUIRES
   driver
   esp_rom
-  esp_timer)
+  esp_timer
+  esp_adc)
 
 set_source_files_properties(
   ${IGNORE_FILES}
