@@ -22,11 +22,13 @@ set(SRC_FILES
     "port/esp/esp-hal-adc.cpp"
     "port/esp/esp-fast-math.cpp"
     "port/arduino/Print.cpp"
-    "port/arduino/Stream.cpp")
+    "port/arduino/Stream.cpp"
+    "port/angle_sensor/sensor_as5600.c")
 
 set(INC_FILES
     "port/arduino/include/" "port/esp/include/" "Arduino-FOC/src/common/"
-    "Arduino-FOC/src/common/base_classes/" "Arduino-FOC/src/")
+    "Arduino-FOC/src/common/base_classes/" "Arduino-FOC/src/"
+    "port/angle_sensor")
 
 set(IGNORE_FILES
     "Arduino-FOC/src/sensors/Encoder.cpp" "port/esp/esp-hal-adc.cpp"

@@ -16,6 +16,6 @@
 #include "../../../Arduino-FOC/src/sensors/GenericSensor.h"
 #include "../../../Arduino-FOC/src/current_sense/GenericCurrentSense.h"
 #include "../../../Arduino-FOC/src/current_sense/LowsideCurrentSense.h"
-
+#include "../../angle_sensor/sensor_as5600.h"
 
 #endif
