@@ -209,7 +209,7 @@ void _writeDutyCycle3PWM(float dc_a, float dc_b, float dc_c, void *params)
 #define LEDC_DUTY_RES LEDC_TIMER_11_BIT // Set duty resolution to 11 bits
 #define LEDC_DUTY (2047)                // Duty Max = 2^11 = 2048
 #define LEDC_FREQUENCY (20 * 1000)      // Frequency in Hertz. Set frequency at 30 kHz
-ledc_channel_t channels[2][3] = {{LEDC_CHANNEL_0, LEDC_CHANNEL_1, LEDC_CHANNEL_2}, {LEDC_CHANNEL_3, LEDC_CHANNEL_4, LEDC_CHANNEL_5}};
+ledc_channel_t ledc_timer_channels[2][3] = {{LEDC_CHANNEL_0, LEDC_CHANNEL_1, LEDC_CHANNEL_2}, {LEDC_CHANNEL_3, LEDC_CHANNEL_4, LEDC_CHANNEL_5}};
 
 /**
  * @description: Configure three pwm channels.
@@ -227,99 +227,151 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
     }
     else
     {
-        pwm_frequency = _constrain(pwm_frequency, 0, _PWM_FREQUENCY_MAX); // constrain to 40kHz max
+        pwm_frequency = _constrain(pwm_frequency, 0, _PWM_FREQUENCY_MAX); // constrain to 50kHZ max
     }
 
-    mcpwm_timer_handle_t timer = NULL;
-    mcpwm_timer_config_t timer_config = {
-        .group_id = group_id,
-        .clk_src = MCPWM_TIMER_CLK_SRC_DEFAULT,
-        .resolution_hz = _PWM_TIMEBASE_RESOLUTION_HZ,
-        .count_mode = MCPWM_TIMER_COUNT_MODE_UP_DOWN, // MCPWM_TIMER_COUNT_MODE_UP
-        .period_ticks = uint32_t(1.0 * _PWM_TIMEBASE_RESOLUTION_HZ / pwm_frequency) * 2,
-    };
-    ESP_ERROR_CHECK(mcpwm_new_timer(&timer_config, &timer));
-
-    mcpwm_oper_handle_t oper[3];
-    mcpwm_operator_config_t operator_config = {
-        .group_id = group_id, // operator must be in the same group to the timer
-    };
-
-    for (int i = 0; i < 3; i++)
+    if (group_id < 2)
     {
-        ESP_ERROR_CHECK(mcpwm_new_operator(&operator_config, &oper[i]));
-    }
+        // using mcpwm driver.
+        mcpwm_timer_handle_t timer = NULL;
+        mcpwm_timer_config_t timer_config = {
+            .group_id = group_id,
+            .clk_src = MCPWM_TIMER_CLK_SRC_DEFAULT,
+            .resolution_hz = _PWM_TIMEBASE_RESOLUTION_HZ,
+            .count_mode = MCPWM_TIMER_COUNT_MODE_UP_DOWN,                                    // centeral mode
+            .period_ticks = uint32_t(1.0 * _PWM_TIMEBASE_RESOLUTION_HZ / pwm_frequency) * 2, // real frequency is pwm_frequency/2
+        };
+        ESP_ERROR_CHECK(mcpwm_new_timer(&timer_config, &timer));
 
-    for (int i = 0; i < 3; i++)
+        mcpwm_oper_handle_t oper[3];
+        mcpwm_operator_config_t operator_config = {
+            .group_id = group_id, // operator must be in the same group to the timer
+        };
+
+        for (int i = 0; i < 3; i++)
+        {
+            ESP_ERROR_CHECK(mcpwm_new_operator(&operator_config, &oper[i]));
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+            ESP_ERROR_CHECK(mcpwm_operator_connect_timer(oper[i], timer));
+        }
+
+        mcpwm_cmpr_handle_t comparator[3];
+        mcpwm_comparator_config_t comparator_config;
+        comparator_config.flags.update_cmp_on_tez = true;
+        comparator_config.flags.update_cmp_on_tep = false;
+        comparator_config.flags.update_cmp_on_sync = false;
+
+        for (int i = 0; i < 3; i++)
+        {
+            ESP_ERROR_CHECK(mcpwm_new_comparator(oper[i], &comparator_config, &comparator[i]));
+            ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator[i], (0)));
+        }
+
+        // bind gpio port
+        mcpwm_gen_handle_t generator[3] = {};
+        mcpwm_generator_config_t generator_config = {};
+        const int gen_gpios[3] = {pinA, pinB, pinC}; // three gpio port
+        for (int i = 0; i < 3; i++)
+        {
+            generator_config.gen_gpio_num = gen_gpios[i];
+            ESP_ERROR_CHECK(mcpwm_new_generator(oper[i], &generator_config, &generator[i]));
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+            ESP_ERROR_CHECK(mcpwm_generator_set_actions_on_timer_event(generator[i],
+                                                                       MCPWM_GEN_TIMER_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, MCPWM_TIMER_EVENT_EMPTY, MCPWM_GEN_ACTION_HIGH),
+                                                                       MCPWM_GEN_TIMER_EVENT_ACTION(MCPWM_TIMER_DIRECTION_DOWN, MCPWM_TIMER_EVENT_FULL, MCPWM_GEN_ACTION_LOW),
+                                                                       MCPWM_GEN_TIMER_EVENT_ACTION_END()));
+            ESP_ERROR_CHECK(mcpwm_generator_set_actions_on_compare_event(generator[i],
+                                                                         MCPWM_GEN_COMPARE_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, comparator[i], MCPWM_GEN_ACTION_LOW),
+                                                                         MCPWM_GEN_COMPARE_EVENT_ACTION(MCPWM_TIMER_DIRECTION_DOWN, comparator[i], MCPWM_GEN_ACTION_HIGH),
+                                                                         MCPWM_GEN_COMPARE_EVENT_ACTION_END()));
+        }
+
+        // set mcpwm dead time
+        mcpwm_dead_time_config_t dead_time_config = {
+            .posedge_delay_ticks = 50,
+            .negedge_delay_ticks = 0,
+        };
+
+        for (int i = 0; i < 3; i++)
+        {
+            ESP_ERROR_CHECK(mcpwm_generator_set_dead_time(generator[i], generator[i], &dead_time_config));
+        }
+
+        // enable mcpwm
+        ESP_ERROR_CHECK(mcpwm_timer_enable(timer));
+        ESP_ERROR_CHECK(mcpwm_timer_start_stop(timer, MCPWM_TIMER_START_NO_STOP));
+
+        // copy params
+        ESP32MCPWMDriverParams *params = new ESP32MCPWMDriverParams{};
+        params->group_id = group_id;
+        params->pwm_frequency = pwm_frequency;
+
+        // use mcpwm driver.
+        params->timer = timer;
+        params->is_config = 1;
+
+        for (int i = 0; i < 3; i++)
+        {
+            params->comparator[i] = comparator[i];
+        }
+        params->pwm_timeperiod = (uint32_t)(timer_config.period_ticks / 2.0f);
+        printf("Success. Using MCPWMDriver, id:%d\n", group_id);
+        group_id++;
+
+        return params;
+    }
+    else if (group_id >= 2 && group_id < 4)
     {
-        ESP_ERROR_CHECK(mcpwm_operator_connect_timer(oper[i], timer));
+        // use ledc driver.
+        ledc_timer_config_t ledc_timer = {
+            .speed_mode = LEDC_MODE,
+            .duty_resolution = LEDC_DUTY_RES,
+            .timer_num = LEDC_TIMER_0,
+            .freq_hz = LEDC_FREQUENCY, // Set output frequency at 20 kHz
+            .clk_cfg = LEDC_USE_APB_CLK};
+        ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
+
+        const int pins[3] = {pinA, pinB, pinC}; // save pins
+
+        ledc_channel_config_t ledc_channel;
+        for (int i = 0; i < 3; i++)
+        {
+            ledc_channel.speed_mode = LEDC_MODE;
+            ledc_channel.timer_sel = LEDC_TIMER_0;
+            ledc_channel.duty = 0;
+            ledc_channel.hpoint = 0;
+            ledc_channel.intr_type = LEDC_INTR_DISABLE;
+            ledc_channel.channel = ledc_timer_channels[group_id - 2][i];
+            ledc_channel.gpio_num = pins[i];
+            ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
+        }
+
+        // copy params
+        ESP32MCPWMDriverParams *params = new ESP32MCPWMDriverParams{};
+        params->group_id = group_id;
+        params->pwm_frequency = pwm_frequency;
+        params->pwm_timeperiod = LEDC_DUTY; // 11bits
+
+        for (int i = 0; i < 3; i++)
+        {
+            params->ledc_channel[i] = ledc_timer_channels[group_id - 2][i];
+        }
+        printf("Success. Using LedcDriver, id:%d\n", group_id);
+
+        group_id++;
+
+        return params;
     }
 
-    mcpwm_cmpr_handle_t comparator[3];
-    mcpwm_comparator_config_t comparator_config;
-    comparator_config.flags.update_cmp_on_tez = true;
-    comparator_config.flags.update_cmp_on_tep = false;
-    comparator_config.flags.update_cmp_on_sync = false;
+    printf("esp_simplefoc only supports four motors\n");
 
-    for (int i = 0; i < 3; i++)
-    {
-        ESP_ERROR_CHECK(mcpwm_new_comparator(oper[i], &comparator_config, &comparator[i]));
-        ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator[i], (0))); // 比较值设置为0
-    }
-
-    // bind gpio port
-    mcpwm_gen_handle_t generator[3] = {};
-    mcpwm_generator_config_t generator_config = {};
-    const int gen_gpios[3] = {pinA, pinB, pinC}; // three gpio port
-    for (int i = 0; i < 3; i++)
-    {
-        generator_config.gen_gpio_num = gen_gpios[i];
-        ESP_ERROR_CHECK(mcpwm_new_generator(oper[i], &generator_config, &generator[i]));
-    }
-
-    for (int i = 0; i < 3; i++)
-    {
-        ESP_ERROR_CHECK(mcpwm_generator_set_actions_on_timer_event(generator[i],
-                                                                   MCPWM_GEN_TIMER_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, MCPWM_TIMER_EVENT_EMPTY, MCPWM_GEN_ACTION_HIGH),
-                                                                   MCPWM_GEN_TIMER_EVENT_ACTION(MCPWM_TIMER_DIRECTION_DOWN, MCPWM_TIMER_EVENT_FULL, MCPWM_GEN_ACTION_LOW),
-                                                                   MCPWM_GEN_TIMER_EVENT_ACTION_END()));
-        ESP_ERROR_CHECK(mcpwm_generator_set_actions_on_compare_event(generator[i],
-                                                                     MCPWM_GEN_COMPARE_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, comparator[i], MCPWM_GEN_ACTION_LOW),
-                                                                     MCPWM_GEN_COMPARE_EVENT_ACTION(MCPWM_TIMER_DIRECTION_DOWN, comparator[i], MCPWM_GEN_ACTION_HIGH),
-                                                                     MCPWM_GEN_COMPARE_EVENT_ACTION_END()));
-    }
-
-    // set mcpwm dead time
-    mcpwm_dead_time_config_t dead_time_config = {
-        .posedge_delay_ticks = 50,
-        .negedge_delay_ticks = 0,
-    };
-
-    for (int i = 0; i < 3; i++)
-    {
-        ESP_ERROR_CHECK(mcpwm_generator_set_dead_time(generator[i], generator[i], &dead_time_config));
-    }
-
-    // enable mcpwm
-    ESP_ERROR_CHECK(mcpwm_timer_enable(timer));
-    ESP_ERROR_CHECK(mcpwm_timer_start_stop(timer, MCPWM_TIMER_START_NO_STOP));
-
-    // copy params
-    ESP32MCPWMDriverParams *params = new ESP32MCPWMDriverParams{};
-    params->group_id = group_id;
-    params->pwm_frequency = pwm_frequency;
-    params->pwm_timeperiod = (uint32_t)(timer_config.period_ticks / 2.0f);
-    params->timer = timer;
-    params->is_config = 1;
-
-    for (int i = 0; i < 3; i++)
-    {
-        params->comparator[i] = comparator[i];
-    }
-
-    group_id++;
-
-    return params;
+    return NULL;
 }
 
 /**
@@ -332,10 +384,24 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
  */
 void _writeDutyCycle3PWM(float dc_a, float dc_b, float dc_c, void *params)
 {
-
-    ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(((ESP32MCPWMDriverParams *)params)->comparator[0], (uint32_t)((uint32_t)(((ESP32MCPWMDriverParams *)params)->pwm_timeperiod * dc_a))));
-    ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(((ESP32MCPWMDriverParams *)params)->comparator[1], (uint32_t)((uint32_t)(((ESP32MCPWMDriverParams *)params)->pwm_timeperiod * dc_b))));
-    ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(((ESP32MCPWMDriverParams *)params)->comparator[2], (uint32_t)((uint32_t)(((ESP32MCPWMDriverParams *)params)->pwm_timeperiod * dc_c))));
+    ESP32MCPWMDriverParams *driverParams = ((ESP32MCPWMDriverParams *)params);
+    if (driverParams->group_id < 2)
+    {
+        // use mcpwm driver
+        ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(driverParams->comparator[0], (uint32_t)((uint32_t)(driverParams->pwm_timeperiod * dc_a))));
+        ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(driverParams->comparator[1], (uint32_t)((uint32_t)(driverParams->pwm_timeperiod * dc_b))));
+        ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(driverParams->comparator[2], (uint32_t)((uint32_t)(driverParams->pwm_timeperiod * dc_c))));
+    }
+    else if (driverParams->group_id >= 2 && driverParams->group_id < 4)
+    {
+        // use ledc driver
+        ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, driverParams->ledc_channel[0], (uint32_t)((uint32_t)(driverParams->pwm_timeperiod * dc_a))));
+        ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, driverParams->ledc_channel[0]));
+        ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, driverParams->ledc_channel[1], (uint32_t)((uint32_t)(driverParams->pwm_timeperiod * dc_b))));
+        ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, driverParams->ledc_channel[1]));
+        ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, driverParams->ledc_channel[2], (uint32_t)((uint32_t)(driverParams->pwm_timeperiod * dc_c))));
+        ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, driverParams->ledc_channel[2]));
+    }
 }
 
 #endif
