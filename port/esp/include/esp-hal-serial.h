@@ -78,7 +78,7 @@ public:
 
 private:
     int8_t _rxPin, _txPin, _ctsPin, _rtsPin;
-    int _uart_num;
+    uart_port_t _uart_num;
     size_t _rxBufferSize;
     size_t _txBufferSize;
     uart_config_t _uart_config;

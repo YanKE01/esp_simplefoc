@@ -206,8 +206,8 @@ void _writeDutyCycle3PWM(float dc_a, float dc_b, float dc_c, void *params)
 
 #define LEDC_TIMER LEDC_TIMER_0
 #define LEDC_MODE LEDC_LOW_SPEED_MODE
-#define LEDC_DUTY_RES LEDC_TIMER_11_BIT // Set duty resolution to 11 bits
-#define LEDC_DUTY (2047)                // Duty Max = 2^11 = 2048
+#define LEDC_DUTY_RES LEDC_TIMER_9_BIT // Set duty resolution to 11 bits
+#define LEDC_DUTY (511)                // Duty Max = 2^11 = 2048
 #define LEDC_FREQUENCY (20 * 1000)      // Frequency in Hertz. Set frequency at 30 kHz
 ledc_channel_t ledc_timer_channels[2][3] = {{LEDC_CHANNEL_0, LEDC_CHANNEL_1, LEDC_CHANNEL_2}, {LEDC_CHANNEL_3, LEDC_CHANNEL_4, LEDC_CHANNEL_5}};
 
@@ -238,8 +238,8 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
             .group_id = group_id,
             .clk_src = MCPWM_TIMER_CLK_SRC_DEFAULT,
             .resolution_hz = _PWM_TIMEBASE_RESOLUTION_HZ,
-            .count_mode = MCPWM_TIMER_COUNT_MODE_UP_DOWN,                                    // centeral mode
-            .period_ticks = uint32_t(1.0 * _PWM_TIMEBASE_RESOLUTION_HZ / pwm_frequency) * 2, // real frequency is pwm_frequency/2
+            .count_mode = MCPWM_TIMER_COUNT_MODE_UP,                                     // centeral mode
+            .period_ticks = (uint32_t)(1 * _PWM_TIMEBASE_RESOLUTION_HZ / pwm_frequency), // real frequency is pwm_frequency/2
         };
         ESP_ERROR_CHECK(mcpwm_new_timer(&timer_config, &timer));
 
@@ -282,25 +282,11 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
 
         for (int i = 0; i < 3; i++)
         {
-            ESP_ERROR_CHECK(mcpwm_generator_set_actions_on_timer_event(generator[i],
-                                                                       MCPWM_GEN_TIMER_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, MCPWM_TIMER_EVENT_EMPTY, MCPWM_GEN_ACTION_HIGH),
-                                                                       MCPWM_GEN_TIMER_EVENT_ACTION(MCPWM_TIMER_DIRECTION_DOWN, MCPWM_TIMER_EVENT_FULL, MCPWM_GEN_ACTION_LOW),
-                                                                       MCPWM_GEN_TIMER_EVENT_ACTION_END()));
-            ESP_ERROR_CHECK(mcpwm_generator_set_actions_on_compare_event(generator[i],
-                                                                         MCPWM_GEN_COMPARE_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, comparator[i], MCPWM_GEN_ACTION_LOW),
-                                                                         MCPWM_GEN_COMPARE_EVENT_ACTION(MCPWM_TIMER_DIRECTION_DOWN, comparator[i], MCPWM_GEN_ACTION_HIGH),
-                                                                         MCPWM_GEN_COMPARE_EVENT_ACTION_END()));
-        }
-
-        // set mcpwm dead time
-        mcpwm_dead_time_config_t dead_time_config = {
-            .posedge_delay_ticks = 50,
-            .negedge_delay_ticks = 0,
-        };
-
-        for (int i = 0; i < 3; i++)
-        {
-            ESP_ERROR_CHECK(mcpwm_generator_set_dead_time(generator[i], generator[i], &dead_time_config));
+            ESP_ERROR_CHECK(mcpwm_generator_set_action_on_timer_event(generator[i],
+                                                                      MCPWM_GEN_TIMER_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, MCPWM_TIMER_EVENT_EMPTY, MCPWM_GEN_ACTION_HIGH)));
+            // go low on compare threshold
+            ESP_ERROR_CHECK(mcpwm_generator_set_action_on_compare_event(generator[i],
+                                                                        MCPWM_GEN_COMPARE_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, comparator[i], MCPWM_GEN_ACTION_LOW)));
         }
 
         // enable mcpwm
@@ -320,7 +306,7 @@ void *_configure3PWM(long pwm_frequency, const int pinA, const int pinB, const i
         {
             params->comparator[i] = comparator[i];
         }
-        params->pwm_timeperiod = (uint32_t)(timer_config.period_ticks / 2.0f);
+        params->pwm_timeperiod = (uint32_t)(timer_config.period_ticks);
         printf("Success. Using MCPWMDriver, id:%d\n", group_id);
         group_id++;
 

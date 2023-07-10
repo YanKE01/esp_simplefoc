@@ -21,7 +21,6 @@ typedef unsigned int word;
 
 #include "WString.h"
 #include "Stream.h"
-#include "Printable.h"
 #include "Print.h"
 #include "WCharacter.h"
 

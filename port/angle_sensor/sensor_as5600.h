@@ -9,13 +9,13 @@ extern "C"
      * @description: sensor as5600 init.
      * @return {*}
      */
-    void sensor_as5600_init();
+    void sensor_as5600_init(int i2c_num, int scl_io, int sda_io);
 
     /**
      * @description: sensor as5600 get raw angle.
      * @return {*}
      */
-    float sensor_as5600_getAngle(void);
+    float sensor_as5600_getAngle(int i2c_num);
 #ifdef __cplusplus
 }
 #endif

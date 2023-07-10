@@ -98,9 +98,9 @@ typedef struct ESP32MCPWMDriverParams
 #include "driver/ledc.h"
 #include "esp_err.h"
 
-#define _PWM_FREQUENCY 40000                           // default
-#define _PWM_FREQUENCY_MAX 100000                      // max
-#define _PWM_TIMEBASE_RESOLUTION_HZ (10 * 1000 * 1000) // 10MHZ 0.1us per tick
+#define _PWM_FREQUENCY 20000                           // default
+#define _PWM_FREQUENCY_MAX 50000                       // max
+#define _PWM_TIMEBASE_RESOLUTION_HZ (10 * 1000 * 1000) // 1MHZ 1us per tick
 
 typedef struct ESP32MCPWMDriverParams
 {
