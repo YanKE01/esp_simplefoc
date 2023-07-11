@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2023-2024 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include "sensor_as5600.h"
 #include "driver/gpio.h"
 #include "driver/i2c.h"

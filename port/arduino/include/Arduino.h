@@ -7,10 +7,10 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
-#include "esp-hal-misc.h"
-#include "esp-hal-serial.h"
-#include "esp-hal-gpio.h"
-#include "esp-hal-mcpwm.h"
+#include "esp_hal_misc.h"
+#include "esp_hal_serial.h"
+#include "esp_hal_gpio.h"
+#include "esp_hal_mcpwm.h"
 
 #define NOP() asm volatile("nop")
 #define PI 3.14159265358979f

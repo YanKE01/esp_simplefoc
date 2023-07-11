@@ -11,9 +11,19 @@
 #include "esp_simplefoc.h"
 #include "unity.h"
 
+void angle_sensor_init()
+{
+    sensor_as5600_init(0, GPIO_NUM_1, GPIO_NUM_2);
+}
+
+float angle_sensor_get()
+{
+    return sensor_as5600_getAngle(0);
+}
+
 BLDCMotor motor = BLDCMotor(14);
 BLDCDriver3PWM driver = BLDCDriver3PWM(17, 16, 15);
-GenericSensor sensor = GenericSensor(sensor_as5600_getAngle, sensor_as5600_init);
+GenericSensor sensor = GenericSensor(angle_sensor_get, angle_sensor_init);
 LowsideCurrentSense cs = LowsideCurrentSense(0.005f, 10, 4, 5, 6);
 
 float target_value = 0.0f;

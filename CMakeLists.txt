@@ -1,38 +1,17 @@
 set(SRC_FILES
-    # "Arduino-FOC/src/common/foc_utils.cpp"
-    "Arduino-FOC/src/common/pid.cpp"
-    "Arduino-FOC/src/common/time_utils.cpp"
-    "Arduino-FOC/src/common/lowpass_filter.cpp"
-    "Arduino-FOC/src/common/base_classes/CurrentSense.cpp"
-    "Arduino-FOC/src/common/base_classes/Sensor.cpp"
-    "Arduino-FOC/src/common/base_classes/FOCMotor.cpp"
-    "Arduino-FOC/src/communication/Commander.cpp"
-    "Arduino-FOC/src/communication/SimpleFOCDebug.cpp"
-    "Arduino-FOC/src/current_sense/GenericCurrentSense.cpp"
-    "Arduino-FOC/src/current_sense/LowsideCurrentSense.cpp"
-    "Arduino-FOC/src/drivers/BLDCDriver3PWM.cpp"
-    "Arduino-FOC/src/sensors/GenericSensor.cpp"
-    "Arduino-FOC/src/sensors/Encoder.cpp"
-    "Arduino-FOC/src/sensors/HallSensor.cpp"
-    "Arduino-FOC/src/BLDCMotor.cpp"
-    "port/esp/esp-hal-misc.cpp"
-    "port/esp/esp-hal-serial.cpp"
-    "port/esp/esp-hal-gpio.cpp"
-    "port/esp/esp-hal-mcpwm.cpp"
-    "port/esp/esp-hal-adc.cpp"
-    "port/esp/esp-fast-math.cpp"
+    "port/esp/esp_hal_misc.cpp"
+    "port/esp/esp_hal_serial.cpp"
+    "port/esp/esp_hal_gpio.cpp"
+    "port/esp/esp_hal_mcpwm.cpp"
+    "port/esp/esp_hal_adc.cpp"
+    "port/esp/esp_fast_math.cpp"
     "port/arduino/Print.cpp"
     "port/arduino/Stream.cpp"
     "port/angle_sensor/sensor_as5600.c")
 
-set(INC_FILES
-    "port/arduino/include/" "port/esp/include/" "Arduino-FOC/src/common/"
-    "Arduino-FOC/src/common/base_classes/" "Arduino-FOC/src/"
-    "port/angle_sensor")
+set(INC_FILES "port/arduino/include/" "port/esp/include/" "port/angle_sensor")
 
-set(IGNORE_FILES
-    "Arduino-FOC/src/sensors/Encoder.cpp" "port/esp/esp-hal-adc.cpp"
-    "Arduino-FOC/src/sensors/HallSensor.cpp" "port/esp/esp-hal-mcpwm.cpp")
+set(IGNORE_FILES "port/esp/esp_hal_adc.cpp" "port/esp/esp_hal_mcpwm.cpp")
 
 idf_component_register(
   SRCS
@@ -41,7 +20,6 @@ idf_component_register(
   ${INC_FILES}
   REQUIRES
   driver
-  esp_rom
   esp_timer
   esp_adc)
 
@@ -51,3 +29,4 @@ set_source_files_properties(
     COMPILE_OPTIONS
     "-Wno-volatile;-Wno-deprecated-enum-float-conversion;-Wno-missing-field-initializers"
 )
+
