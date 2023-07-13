@@ -1,7 +1,9 @@
-version: 0.0.12
+version: 0.0.2
 targets:
   - esp32
+  - esp32s2
   - esp32s3
+  - esp32c6
 description: Espressif's additions to SimpleFOC
 url: https://github.com/espressif/esp-iot-solution
 repository: https://github.com/espressif/esp-iot-solution.git
@@ -11,6 +13,6 @@ dependencies:
   idf:
     version: '>=4.4'
   Arduino-FOC:
-    version: "esp_based_on_v2.3.0"
+    version: "*"
     git: git@github.com:YanKE01/Arduino-FOC.git
   espressif/iqmath: "^1.11.0"

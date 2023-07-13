@@ -8,3 +8,9 @@
     * Fix mcpwm driver for esp-simplefoc. Modify MCPWM mode to center on its mode.
     * Compatible with IDF4.4.* driver.
     * Compatible with SimpleFOC Studio host computer.
+
+## V0.0.2 - 2023-7-13
+* FOC:
+    * Remove the arduino-foc submodule and replace it with a component dependency.
+    * Modify the Driver class of Arduino-FOC to support manual selection of pwm driver mode. If no PWM driver mode is specified, the system automatically applies for PWM driver.
+    * Synchronize changes to test_apps.

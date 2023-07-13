@@ -206,8 +206,8 @@ void _writeDutyCycle3PWM(float dc_a, float dc_b, float dc_c, void *params)
 
 #define LEDC_TIMER LEDC_TIMER_0
 #define LEDC_MODE LEDC_LOW_SPEED_MODE
-#define LEDC_DUTY_RES LEDC_TIMER_9_BIT // Set duty resolution to 11 bits
-#define LEDC_DUTY (511)                // Duty Max = 2^11 = 2048
+#define LEDC_DUTY_RES LEDC_TIMER_9_BIT // Set duty resolution to 9 bits
+#define LEDC_DUTY (511)                // Duty Max = 2^9 = 511
 #define LEDC_FREQUENCY (20 * 1000)      // Frequency in Hertz. Set frequency at 30 kHz
 ledc_channel_t ledc_timer_channels[2][3] = {{LEDC_CHANNEL_0, LEDC_CHANNEL_1, LEDC_CHANNEL_2}, {LEDC_CHANNEL_3, LEDC_CHANNEL_4, LEDC_CHANNEL_5}};
 

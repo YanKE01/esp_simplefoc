@@ -11,39 +11,63 @@
 #include "esp_simplefoc.h"
 #include "unity.h"
 
-void angle_sensor_init()
+const char *TAG = "TEST";
+
+void angle_sensor_scl_1_sda_2_init()
 {
     sensor_as5600_init(0, GPIO_NUM_1, GPIO_NUM_2);
 }
 
-float angle_sensor_get()
+float angle_sensor_scl_1_sda_2_get()
 {
     return sensor_as5600_getAngle(0);
 }
 
-BLDCMotor motor = BLDCMotor(14);
-BLDCDriver3PWM driver = BLDCDriver3PWM(17, 16, 15);
-GenericSensor sensor = GenericSensor(angle_sensor_get, angle_sensor_init);
-LowsideCurrentSense cs = LowsideCurrentSense(0.005f, 10, 4, 5, 6);
-
-float target_value = 0.0f;
-Commander command = Commander(Serial);
-void doTarget(char *cmd) { command.scalar(&target_value, cmd); }
-void onMotor(char *cmd) { command.motor(&motor, cmd); }
-
-TEST_CASE("test esp_simplefoc openloop", "[single motor][openloop]")
+void angle_sensor_scl_40_sda_39_init()
 {
+    sensor_as5600_init(0, GPIO_NUM_40, GPIO_NUM_39);
+}
+
+float angle_sensor_scl_40_sda_39_get()
+{
+    return sensor_as5600_getAngle(0);
+}
+
+void angle_sensor_scl_42_sda_41_init()
+{
+    sensor_as5600_init(1, GPIO_NUM_42, GPIO_NUM_41);
+}
+
+float angle_sensor_scl_42_sda_41_get()
+{
+    return sensor_as5600_getAngle(1);
+}
+
+// LowsideCurrentSense cs = LowsideCurrentSense(0.005f, 10, 4, 5, 6);
+
+// float target_value = 0.0f;
+// Commander command = Commander(Serial);
+// void doTarget(char *cmd) { command.scalar(&target_value, cmd); }
+// void onMotor(char *cmd) { command.motor(&motor, cmd); }
+
+TEST_CASE("test esp_simplefoc openloop control", "[single motor][openloop][14pp][mcpwm]")
+{
+
+    BLDCMotor motor = BLDCMotor(14);
+    BLDCDriver3PWM driver = BLDCDriver3PWM(17, 16, 15);
+
     SimpleFOCDebug::enable(); // enbale debug
+    Serial.begin(115200);
+
     driver.voltage_power_supply = 12;
     driver.voltage_limit = 11;
-    driver.init(); // enable 3pwm driver
+    driver.init(0); // enable 3pwm driver, use mcpwm group_0
     motor.linkDriver(&driver);
 
     motor.velocity_limit = 200.0; // 200 rad/s velocity limit
     motor.voltage_limit = 12.0;   // 12 Volt
     motor.controller = MotionControlType::velocity_openloop;
 
-    Serial.begin(115200);
     motor.init();
     while (1)
     {
@@ -52,14 +76,72 @@ TEST_CASE("test esp_simplefoc openloop", "[single motor][openloop]")
     }
 }
 
-TEST_CASE("test esp_simplefoc position control", "[single motor][position control]")
+TEST_CASE("test esp_simplefoc openloop control", "[single motor][openloop][14pp][ledc]")
 {
-    SimpleFOCDebug::enable(); // enable debug
-    sensor.init();            // enable as5600 angle sensor
+
+    BLDCMotor motor = BLDCMotor(14);
+    BLDCDriver3PWM driver = BLDCDriver3PWM(17, 16, 15);
+
+    SimpleFOCDebug::enable(); // enbale debug
+    Serial.begin(115200);
+
+    driver.voltage_power_supply = 12;
+    driver.voltage_limit = 11;
+    driver.init({1, 2, 3}); // enable 3pwm driver, use ledc channel {1,2,3}
+    motor.linkDriver(&driver);
+
+    motor.velocity_limit = 200.0; // 200 rad/s velocity limit
+    motor.voltage_limit = 12.0;   // 12 Volt
+    motor.controller = MotionControlType::velocity_openloop;
+
+    motor.init();
+    while (1)
+    {
+        motor.move(1.2f);
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+    }
+}
+
+TEST_CASE("test esp_simplefoc openloop control", "[single motor][openloop][14pp][auto]")
+{
+
+    BLDCMotor motor = BLDCMotor(14);
+    BLDCDriver3PWM driver = BLDCDriver3PWM(17, 16, 15);
+
+    SimpleFOCDebug::enable(); // enbale debug
+    Serial.begin(115200);
+
+    driver.voltage_power_supply = 12;
+    driver.voltage_limit = 11;
+    driver.init(); // enable 3pwm driver, system automatically selects the idle driver
+    motor.linkDriver(&driver);
+
+    motor.velocity_limit = 200.0; // 200 rad/s velocity limit
+    motor.voltage_limit = 12.0;   // 12 Volt
+    motor.controller = MotionControlType::velocity_openloop;
+
+    motor.init();
+    while (1)
+    {
+        motor.move(1.2f);
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+    }
+}
+
+TEST_CASE("test esp_simplefoc position control", "[single motor][position][14pp][auto]")
+{
+
+    BLDCMotor motor = BLDCMotor(14);
+    BLDCDriver3PWM driver = BLDCDriver3PWM(17, 16, 15);
+    GenericSensor sensor = GenericSensor(angle_sensor_scl_1_sda_2_get, angle_sensor_scl_1_sda_2_init);
+    SimpleFOCDebug::enable(); // enbale debug
+    Serial.begin(115200);
+
+    sensor.init(); // enable as5600 angle sensor
     motor.linkSensor(&sensor);
     driver.voltage_power_supply = 12;
     driver.voltage_limit = 11;
-    driver.init(); // enable 3pwm driver
+    driver.init(); // enable 3pwm driver, system automatically selects the idle driver.
     motor.linkDriver(&driver);
     motor.controller = MotionControlType::angle; // set position control mode
 
@@ -85,19 +167,26 @@ TEST_CASE("test esp_simplefoc position control", "[single motor][position contro
     {
         motor.loopFOC();
         motor.move(2.5f);
+        vTaskDelay(1 / portTICK_PERIOD_MS);
     }
 }
 
-TEST_CASE("test esp_simplefoc velocity control", "[single motor][velocity control]")
+TEST_CASE("test esp_simplefoc position control", "[single motor][position][14pp][mcpwm]")
 {
-    SimpleFOCDebug::enable(); // enable debug
-    sensor.init();            // enable as5600 sensor angle
+
+    BLDCMotor motor = BLDCMotor(14);
+    BLDCDriver3PWM driver = BLDCDriver3PWM(17, 16, 15);
+    GenericSensor sensor = GenericSensor(angle_sensor_scl_1_sda_2_get, angle_sensor_scl_1_sda_2_init);
+    SimpleFOCDebug::enable(); // enbale debug
+    Serial.begin(115200);
+
+    sensor.init(); // enable as5600 angle sensor
     motor.linkSensor(&sensor);
     driver.voltage_power_supply = 12;
     driver.voltage_limit = 11;
-    driver.init();
+    driver.init(0); // enable 3pwm driver, use mcpwm driver, group 0.
     motor.linkDriver(&driver);
-    motor.controller = MotionControlType::velocity; // set velocity control mode
+    motor.controller = MotionControlType::angle; // set position control mode
 
     // set velocity pid
     motor.PID_velocity.P = 0.9f;
@@ -105,7 +194,10 @@ TEST_CASE("test esp_simplefoc velocity control", "[single motor][velocity contro
     motor.voltage_limit = 11;
     motor.voltage_sensor_align = 2;
 
+    // set angle pid
     motor.LPF_velocity.Tf = 0.05;
+    motor.P_angle.P = 15.5;
+    motor.P_angle.D = 0.05;
     motor.velocity_limit = 200;
 
     Serial.begin(115200);
@@ -118,19 +210,26 @@ TEST_CASE("test esp_simplefoc velocity control", "[single motor][velocity contro
     {
         motor.loopFOC();
         motor.move(2.5f);
+        vTaskDelay(1 / portTICK_PERIOD_MS);
     }
 }
 
-TEST_CASE("test esp_simplefoc command velocity control", "[single motor][velocity control][command]")
+TEST_CASE("test esp_simplefoc position control", "[single motor][position][14pp][ledc]")
 {
-    SimpleFOCDebug::enable(); // enable debug
-    sensor.init();            // enable as5600 angle sensor
+
+    BLDCMotor motor = BLDCMotor(14);
+    BLDCDriver3PWM driver = BLDCDriver3PWM(17, 16, 15);
+    GenericSensor sensor = GenericSensor(angle_sensor_scl_1_sda_2_get, angle_sensor_scl_1_sda_2_init);
+    SimpleFOCDebug::enable(); // enbale debug
+    Serial.begin(115200);
+
+    sensor.init(); // enable as5600 angle sensor
     motor.linkSensor(&sensor);
     driver.voltage_power_supply = 12;
     driver.voltage_limit = 11;
-    driver.init();
+    driver.init({4, 5, 6}); // enable 3pwm driver, use ledc driver {4,5,6}
     motor.linkDriver(&driver);
-    motor.controller = MotionControlType::velocity; // set velocity control mode
+    motor.controller = MotionControlType::angle; // set position control mode
 
     // set velocity pid
     motor.PID_velocity.P = 0.9f;
@@ -138,7 +237,10 @@ TEST_CASE("test esp_simplefoc command velocity control", "[single motor][velocit
     motor.voltage_limit = 11;
     motor.voltage_sensor_align = 2;
 
+    // set angle pid
     motor.LPF_velocity.Tf = 0.05;
+    motor.P_angle.P = 15.5;
+    motor.P_angle.D = 0.05;
     motor.velocity_limit = 200;
 
     Serial.begin(115200);
@@ -147,79 +249,169 @@ TEST_CASE("test esp_simplefoc command velocity control", "[single motor][velocit
     motor.init();    // initialize motor
     motor.initFOC(); // align sensor and start FOC
 
-    // using "T1.2" to control velocity
-    command.add('T', doTarget, const_cast<char *>("target angle")); // add serial command
-
     while (1)
     {
         motor.loopFOC();
-        motor.move(target_value);
-        command.run();
+        motor.move(2.5f);
+        vTaskDelay(1 / portTICK_PERIOD_MS);
     }
 }
 
-TEST_CASE("test esp_simplefoc angle current control", "[single motor][angle control][current]")
+TEST_CASE("test esp_simplefoc velocity control", "[single motor][velocity][14pp][auto]")
 {
-    SimpleFOCDebug::enable();
-    sensor.init();
+
+    BLDCMotor motor = BLDCMotor(14);
+    BLDCDriver3PWM driver = BLDCDriver3PWM(17, 16, 15);
+    GenericSensor sensor = GenericSensor(angle_sensor_scl_1_sda_2_get, angle_sensor_scl_1_sda_2_init);
+    SimpleFOCDebug::enable(); // enbale debug
+    Serial.begin(115200);
+
+    sensor.init(); // enable as5600 angle sensor
     motor.linkSensor(&sensor);
     driver.voltage_power_supply = 12;
     driver.voltage_limit = 11;
-    driver.init();
+    driver.init(); // enable 3pwm driver, auto select.
     motor.linkDriver(&driver);
-    cs.linkDriver(&driver);
-
-    motor.foc_modulation = FOCModulationType::SpaceVectorPWM;
-
-    motor.torque_controller = TorqueControlType::voltage;
-    motor.controller = MotionControlType::angle;
-    motor.motion_downsample = 0.0;
+    motor.controller = MotionControlType::velocity; // set position control mode
 
     // set velocity pid
-    motor.PID_velocity.P = 1.2;
-    motor.PID_velocity.I = 1.2;
+    motor.PID_velocity.P = 0.9f;
+    motor.PID_velocity.I = 2.2f;
+    motor.voltage_limit = 11;
+    motor.voltage_sensor_align = 2;
+
+    // set angle pid
     motor.LPF_velocity.Tf = 0.05;
-
-    // set angle PID
-    motor.P_angle.P = 10.0;
+    motor.P_angle.P = 15.5;
     motor.P_angle.D = 0.05;
-    motor.LPF_angle.Tf = 0.0;
-
-    // set current pid
-    motor.PID_current_q.P = 3.0;
-    motor.PID_current_q.I = 100.0;
-    motor.LPF_current_q.Tf = 0.05;
-    motor.PID_current_d.P = 3.0;
-    motor.PID_current_d.I = 100.0;
-    motor.LPF_current_d.Tf = 0.05;
-
-    // limits
-    motor.velocity_limit = 200.0; // 100 rad/s velocity limit
-    motor.voltage_limit = 12.0;   // 12 Volt limit
-    motor.current_limit = 3.0;    // 3 Amp current limit
-    motor.monitor_downsample = 100;
+    motor.velocity_limit = 200;
 
     Serial.begin(115200);
 
     motor.useMonitoring(Serial);
-    motor.init();
-
-    cs.init();
-    cs.gain_a *= -1;
-    cs.gain_b *= -1;
-    cs.gain_c *= -1;
-    motor.linkCurrentSense(&cs);
-    motor.initFOC();
-
-    command.add('T', doTarget, const_cast<char *>("target angle"));
-    command.add('M', onMotor, const_cast<char *>(("my motor")));
+    motor.init();    // initialize motor
+    motor.initFOC(); // align sensor and start FOC
 
     while (1)
     {
         motor.loopFOC();
-        motor.move(5.5f);
-        motor.monitor();
-        command.run();
+        motor.move(2.5f);
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+    }
+}
+
+TEST_CASE("test esp_simplefoc openloop control", "[two motors][openloop][7pp][auto]")
+{
+    BLDCMotor motor1 = BLDCMotor(7);
+    BLDCDriver3PWM driver1 = BLDCDriver3PWM(13, 14, 21);
+
+    BLDCMotor motor2 = BLDCMotor(7);
+    BLDCDriver3PWM driver2 = BLDCDriver3PWM(47, 48, 45);
+
+    pinMode(GPIO_NUM_38, OUTPUT);
+    digitalWrite(GPIO_NUM_38, HIGH); // enable drv8313
+
+    SimpleFOCDebug::enable(); // enbale debug
+    Serial.begin(115200);
+
+    // M1
+    driver1.voltage_power_supply = 12;
+    driver1.voltage_limit = 11;
+    driver1.init(); // enable 3pwm driver, auto select
+    motor1.linkDriver(&driver1);
+
+    motor1.velocity_limit = 200.0; // 200 rad/s velocity limit
+    motor1.voltage_limit = 12.0;   // 12 Volt
+    motor1.controller = MotionControlType::velocity_openloop;
+    motor1.init();
+
+    // M2
+    driver2.voltage_power_supply = 12;
+    driver2.voltage_limit = 11;
+    driver2.init(); // enable 3pwm driver, auto select
+    motor2.linkDriver(&driver2);
+    motor2.velocity_limit = 200.0; // 200 rad/s velocity limit
+    motor2.voltage_limit = 12.0;   // 12 Volt
+    motor2.controller = MotionControlType::velocity_openloop;
+    motor2.init();
+
+    while (1)
+    {
+        motor1.move(1.2f);
+        motor2.move(1.2f);
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+    }
+}
+
+TEST_CASE("test esp_simplefoc position control", "[two motors][position][7pp][auto]")
+{
+    BLDCMotor motor1 = BLDCMotor(7);
+    BLDCDriver3PWM driver1 = BLDCDriver3PWM(13, 14, 21);
+    GenericSensor sensor1 = GenericSensor(angle_sensor_scl_40_sda_39_get, angle_sensor_scl_40_sda_39_init);
+
+    BLDCMotor motor2 = BLDCMotor(7);
+    BLDCDriver3PWM driver2 = BLDCDriver3PWM(47, 48, 45);
+    GenericSensor sensor2 = GenericSensor(angle_sensor_scl_42_sda_41_get, angle_sensor_scl_42_sda_41_init);
+
+    pinMode(GPIO_NUM_38, OUTPUT);
+    digitalWrite(GPIO_NUM_38, HIGH); // enable drv8313
+
+    SimpleFOCDebug::enable(); // enbale debug
+    Serial.begin(115200);
+
+    // M1
+    sensor1.init(); // enable as5600 angle sensor
+    motor1.linkSensor(&sensor1);
+    driver1.voltage_power_supply = 12;
+    driver1.voltage_limit = 11;
+    driver1.init(); // enable 3pwm driver, auto select
+    motor1.linkDriver(&driver1);
+    motor1.foc_modulation = FOCModulationType::SpaceVectorPWM;
+    motor1.controller = MotionControlType::angle;
+
+    motor1.PID_velocity.P = 0.2f;
+    motor1.PID_velocity.I = 1.3f;
+    motor1.voltage_limit = 11;
+    motor1.voltage_sensor_align = 2;
+    motor1.LPF_velocity.Tf = 0.1;
+    motor1.P_angle.P = 8.5;
+    motor1.P_angle.D = 0.2;
+    motor1.velocity_limit = 200;
+
+    motor1.useMonitoring(Serial);
+    motor1.init();    // initialize motor
+    motor1.initFOC(); // align sensor and start FOC
+
+    // M2
+    sensor2.init(); // enable as5600 angle sensor
+    motor2.linkSensor(&sensor2);
+    driver2.voltage_power_supply = 12;
+    driver2.voltage_limit = 11;
+    driver2.init(); // enable 3pwm driver, auto select
+    motor2.linkDriver(&driver2);
+    motor2.foc_modulation = FOCModulationType::SpaceVectorPWM;
+    motor2.controller = MotionControlType::angle;
+
+    motor2.PID_velocity.P = 0.2f;
+    motor2.PID_velocity.I = 1.3f;
+    motor2.voltage_limit = 11;
+    motor2.voltage_sensor_align = 2;
+    motor2.LPF_velocity.Tf = 0.1;
+    motor2.P_angle.P = 1.5;
+    motor2.P_angle.D = 0.2;
+    motor2.velocity_limit = 200;
+
+    motor2.useMonitoring(Serial);
+    motor2.init();    // initialize motor
+    motor2.initFOC(); // align sensor and start FOC
+
+    while (1)
+    {
+        motor1.move(1.2f);
+        motor2.move(1.2f);
+        motor1.loopFOC();
+        motor2.loopFOC();
+        vTaskDelay(1 / portTICK_PERIOD_MS);
     }
 }
 

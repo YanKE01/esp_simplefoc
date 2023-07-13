@@ -1,9 +1,3 @@
-/*
- * SPDX-FileCopyrightText: 2023-2024 Espressif Systems (Shanghai) CO LTD
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 #ifndef ESP_HAL_MCPWM_H
 #define ESP_HAL_MCPWM_H
 
@@ -97,6 +91,7 @@ typedef struct ESP32MCPWMDriverParams
 #include "driver/mcpwm_prelude.h"
 #include "driver/ledc.h"
 #include "esp_err.h"
+
 
 #define _PWM_FREQUENCY 20000                           // default
 #define _PWM_FREQUENCY_MAX 50000                       // max
