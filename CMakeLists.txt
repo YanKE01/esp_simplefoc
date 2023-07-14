@@ -23,8 +23,7 @@ idf_component_register(
   REQUIRES
   driver
   esp_timer
-  esp_adc
-  Arduino-FOC)
+  esp_adc)
 
 set_source_files_properties(
   ${IGNORE_FILES}
@@ -33,6 +32,6 @@ set_source_files_properties(
     "-Wno-volatile;-Wno-deprecated-enum-float-conversion;-Wno-missing-field-initializers"
 )
 
-idf_component_get_property(arduino_foc_lib "Arduino-FOC" COMPONENT_LIB)
-target_include_directories(
-  ${arduino_foc_lib} PRIVATE "port/arduino/include" PRIVARE "port/esp/include")
+idf_component_get_property(arduino-foc_lib espressif__arduino-foc COMPONENT_LIB)
+cmake_policy(SET CMP0079 NEW)
+target_link_libraries(${arduino-foc_lib} PUBLIC ${COMPONENT_LIB})

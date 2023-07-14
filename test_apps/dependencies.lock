@@ -1,11 +1,10 @@
 dependencies:
-  Arduino-FOC:
-    component_hash: cd3710efcb7107adef2eec85e9b4f2d2a3cf1126506f31cc9bb019edb8df786f
+  espressif/arduino-foc:
+    component_hash: 068526c65cfcc30d04bff085816a066816cdc4b97c81ef1e632c7540da749905
     source:
-      git: git@github.com:YanKE01/Arduino-FOC.git
-      path: .
-      type: git
-    version: c551a5c344aef2b79e7932e6049de02c79c0a54f
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 2.3.0
   espressif/iqmath:
     component_hash: 407d5bc3fd358a73d2b09982918ab508b4e804cc547942c5979d226be86b7e75
     source:
@@ -17,6 +16,6 @@ dependencies:
     source:
       type: idf
     version: 5.2.0
-manifest_hash: 4e65921161bf4f4746dfd906eeb471e5e4dd624550f83c79ed0e42d8a05cff72
+manifest_hash: 57d63a4705fd9d24e8803d6719b81428ed2f069d34e53867992fd95a0235b2b1
 target: esp32s3
 version: 1.0.0

@@ -12,7 +12,7 @@ issues: https://github.com/espressif/esp-iot-solution/issues
 dependencies:
   idf:
     version: '>=4.4'
-  Arduino-FOC:
-    version: "*"
-    git: git@github.com:YanKE01/Arduino-FOC.git
+  espressif/arduino-foc:
+    version: "^2.3.0"
+    public: true
   espressif/iqmath: "^1.11.0"
