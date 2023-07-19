@@ -1,5 +1,10 @@
-#ifndef _ESP_BLDC_3PWM_H
-#define _ESP_BLDC_3PWM_H
+/*
+ * SPDX-FileCopyrightText: 2023-2024 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#pragma once
 
 #include "BLDCDriver.h"
 #include "foc_utils.h"
@@ -86,5 +91,3 @@ private:
   mcpwm_cmpr_handle_t comparator[3];
   uint32_t mcpwm_period;
 };
-
-#endif

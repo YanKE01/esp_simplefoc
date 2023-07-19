@@ -1,5 +1,10 @@
-#ifndef ESP_HAL_ADC_H
-#define ESP_HAL_ADC_H
+/*
+ * SPDX-FileCopyrightText: 2023-2024 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#pragma once
 
 #include "esp_idf_version.h"
 
@@ -30,4 +35,3 @@ typedef struct ESP32MCPWMCurrentSenseParams
 void *_configureADCLowSide(const void *driver_params, const int pinA, const int pinB, const int pinC);
 void _readAdcTest(void *params);
 
-#endif

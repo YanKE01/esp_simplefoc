@@ -1,5 +1,10 @@
-#ifndef ESP_HAL_GPIO_H
-#define ESP_HAL_GPIO_H
+/*
+ * SPDX-FileCopyrightText: 2023-2024 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#pragma once
 
 #include <stdint.h>
 #include "Arduino.h"
@@ -55,6 +60,4 @@ extern "C"
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

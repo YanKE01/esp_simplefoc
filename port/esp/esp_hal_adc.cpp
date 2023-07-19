@@ -212,7 +212,7 @@ void _driverSyncLowSide(void *driver_params, void *cs_params)
 }
 
 /**
- * @description: 定时器
+ * @description: Mcpwm isr handler entry.
  * @param {mcpwm_timer_handle_t} timer
  * @param {mcpwm_timer_event_data_t} *edata
  * @param {void} *user_ctx

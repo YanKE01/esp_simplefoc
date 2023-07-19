@@ -1,15 +1,15 @@
-#ifndef ESP_HAL_SERIAL_H
-#define ESP_HAL_SERIAL_H
+/*
+ * SPDX-FileCopyrightText: 2023-2024 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+#pragma once
 
 #include "Stream.h"
 
 #include "driver/gpio.h"
 #include "driver/uart.h"
 #include "soc/soc_caps.h"
-
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/semphr.h"
 
 /**
  * ESP32-S-Devkitc default serial port: tx:1 rx:3
@@ -29,7 +29,7 @@ class HardwareSerial : public Stream
 public:
     HardwareSerial();
     ~HardwareSerial();
-    void begin(unsigned long baud, uart_port_t uart_num = UART_NUM_0, int tx_io = TX0, int rx_io = RX0, uart_word_length_t wordLength = UART_DATA_8_BITS, uart_parity_t parity = UART_PARITY_DISABLE, uart_stop_bits_t stopBits = UART_STOP_BITS_1, int8_t rxPin = -1, int8_t txPin = -1, bool invert = false, unsigned long timeout_ms = 20000UL, uint8_t rxfifo_full_thrhd = 112);
+    void begin(unsigned long baud, uart_port_t uart_num = CONFIG_ESP_CONSOLE_UART_NUM, int tx_io = TX0, int rx_io = RX0, uart_word_length_t wordLength = UART_DATA_8_BITS, uart_parity_t parity = UART_PARITY_DISABLE, uart_stop_bits_t stopBits = UART_STOP_BITS_1, int8_t rxPin = -1, int8_t txPin = -1, bool invert = false, unsigned long timeout_ms = 20000UL, uint8_t rxfifo_full_thrhd = 112);
     void end();
     int available(void);
     int peek(void);
@@ -79,5 +79,3 @@ private:
 };
 
 extern HardwareSerial Serial;
-
-#endif

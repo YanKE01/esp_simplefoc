@@ -1,5 +1,10 @@
-#ifndef String_class_h
-#define String_class_h
+/*
+ * SPDX-FileCopyrightText: 2023-2024 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+#pragma once
+
 #ifdef __cplusplus
 
 #include <stdlib.h>
@@ -12,4 +17,4 @@ class __FlashStringHelper;
 #define F(string_literal) (FPSTR((string_literal)))
 
 #endif
-#endif
+

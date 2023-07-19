@@ -5,9 +5,6 @@
  */
 
 #include "esp_hal_serial.h"
-#include "esp_log.h"
-
-const char *ESP_HAL_SERIAL_TAG = "ESP HAL SERIAL";
 
 HardwareSerial Serial;
 

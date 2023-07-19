@@ -1,5 +1,9 @@
-#ifndef Arduino_h
-#define Arduino_h
+/*
+ * SPDX-FileCopyrightText: 2023-2024 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+#pragma once
 
 #include <math.h>
 #include <stdbool.h>
@@ -19,10 +23,7 @@ typedef bool boolean;
 typedef uint8_t byte;
 typedef unsigned int word;
 
-#include "WString.h"
-#include "Stream.h"
 #include "Print.h"
-#include "WCharacter.h"
 
 enum PINMODE
 {
@@ -45,5 +46,12 @@ enum PININTERRUPT
     CHANGE,     // high->low or low->high
 };
 
-
-#endif
+/**
+ * @description: Judge whether it is a number or not.
+ * @param {int} c
+ * @return {*}
+ */
+inline boolean isDigit(int c)
+{
+    return (isdigit(c) == 0 ? false : true);
+}
