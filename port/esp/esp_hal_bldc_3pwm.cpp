@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "esp_bldc_3pwm.h"
+#include "esp_hal_bldc_3pwm.h"
 #include <map>
 
 std::vector<std::pair<DriverMode, std::tuple<int, int>>> HardwareResource = {

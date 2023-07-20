@@ -23,7 +23,9 @@ typedef bool boolean;
 typedef uint8_t byte;
 typedef unsigned int word;
 
-#include "Print.h"
+class __FlashStringHelper;
+#define F(string_literal) (((string_literal)))
+
 
 enum PINMODE
 {

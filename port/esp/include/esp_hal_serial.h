@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "Stream.h"
+#include "esp_app_print.h"
 
 #include "driver/gpio.h"
 #include "driver/uart.h"

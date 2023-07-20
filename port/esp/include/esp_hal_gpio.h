@@ -7,7 +7,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "Arduino.h"
+#include "esp_platform.h"
 
 #ifdef __cplusplus
 extern "C"

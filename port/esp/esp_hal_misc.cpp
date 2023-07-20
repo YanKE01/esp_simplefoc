@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "Arduino.h"
+#include "esp_platform.h"
 #include "esp_hal_misc.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"

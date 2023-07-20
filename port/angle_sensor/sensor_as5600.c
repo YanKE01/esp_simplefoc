@@ -36,7 +36,7 @@ void sensor_as5600_init(int i2c_num, int scl_io, int sda_io)
         return;
     }
 
-    // 安装驱动
+    // install driver
     i2c_driver_install(i2c_num, conf.mode, 0, 0, 0);
 }
 
