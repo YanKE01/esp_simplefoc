@@ -14,7 +14,6 @@
 #include "esp_hal_misc.h"
 #include "esp_hal_serial.h"
 #include "esp_hal_gpio.h"
-#include "esp_hal_mcpwm.h"
 
 #define NOP() asm volatile("nop")
 #define PI 3.14159265358979f
@@ -26,32 +25,31 @@ typedef unsigned int word;
 class __FlashStringHelper;
 #define F(string_literal) (((string_literal)))
 
-
-enum PINMODE
-{
-    INPUT = 0,
-    OUTPUT,
-    INPUT_PULLUP,
-    INPUT_PULLDOWN,
+enum PINMODE {
+    INPUT = 0,      /*!< Pin mode: input mode */
+    OUTPUT,         /*!< Pin mode: output mode */
+    INPUT_PULLUP,   /*!< Pin mode: input mode, enable pullup */
+    INPUT_PULLDOWN, /*!< Pin mode: input mode, enable pulldown */
 };
 
-enum PINLEVEL
-{
-    LOW = 0,
-    HIGH,
+enum PINLEVEL {
+    LOW = 0, /*!< Pin level: low level*/
+    HIGH,    /*!< Pin level: high level*/
 };
 
-enum PININTERRUPT
-{
-    RISING = 0, // low->high
-    FALLING,    // high->low
-    CHANGE,     // high->low or low->high
+enum PININTERRUPT {
+    RISING = 0, /*!< Pin interrupt trigger mode: rising */
+    FALLING,    /*!< Pin interrupt trigger mode: falling */
+    CHANGE,     /*!< Pin interrupt trigger mode: rising or falling */
 };
 
 /**
- * @description: Judge whether it is a number or not.
- * @param {int} c
- * @return {*}
+ * @brief Judge whether it is a number or not.
+ *
+ * @param c character to be checked, casted to an int, or eof.
+ * @return
+ *     - true Digit
+ *     - false Otherwise
  */
 inline boolean isDigit(int c)
 {
