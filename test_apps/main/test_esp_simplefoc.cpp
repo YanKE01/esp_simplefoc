@@ -445,6 +445,14 @@ TEST_CASE("test esp_simplefoc position control", "[two motors][position][7pp][au
     }
 }
 
+TEST_CASE("test 6pwm mode", "test")
+{
+    BLDCDriver6PWM driver = BLDCDriver6PWM(10, 11, 12, 13, 15, 16);
+    driver.init();
+    driver.halPwmWrite();
+    driver.deinit();
+}
+
 extern "C" void app_main(void)
 {
     printf("  _____ ____  ____      ____ ___ __  __ ____  _     _____ _____ ___   ____ \n");

@@ -7,7 +7,7 @@
 #include <map>
 #include "esp_hal_bldc_3pwm.h"
 
-std::vector<std::pair<DriverMode, std::tuple<int, int>>> HardwareResource = {
+static std::vector<std::pair<DriverMode, std::tuple<int, int>>> HardwareResource = {
     {DriverMode::mcpwm, {0, 0}},
     {DriverMode::mcpwm, {1, 0}},
     {DriverMode::ledc, {0, 0}},
@@ -21,9 +21,9 @@ std::vector<std::pair<DriverMode, std::tuple<int, int>>> HardwareResource = {
     {DriverMode::ledc, {8, 0}},
 };
 
-int auto_mcpwm_group = -1;
-std::vector<int> auto_ledc_channels(3, -1);
-int auto_ledc_count = 0;
+static int auto_mcpwm_group = -1;
+static std::vector<int> auto_ledc_channels(3, -1);
+static int auto_ledc_count = 0;
 
 BLDCDriver3PWM::BLDCDriver3PWM(int phA, int phB, int phC, int en1, int en2, int en3)
 {
@@ -106,7 +106,7 @@ void BLDCDriver3PWM::setPwm(float Ua, float Ub, float Uc)
     halPwmWrite();
 }
 
-bool checkMcpwmGroupAvailable(int group_id)
+static bool checkMcpwmGroupAvailable(int group_id)
 {
     for (const auto &kvp : HardwareResource) {
         if (kvp.first == DriverMode::mcpwm) {
@@ -121,7 +121,7 @@ bool checkMcpwmGroupAvailable(int group_id)
     return false;
 }
 
-bool checkLedcAvailable(std::vector<int> ledc_channels)
+static bool checkLedcAvailable(std::vector<int> ledc_channels)
 {
     int channeld_available_num = 0;
     if (ledc_channels.size() != 3) {
@@ -146,7 +146,7 @@ bool checkLedcAvailable(std::vector<int> ledc_channels)
     return channeld_available_num == 3;
 }
 
-int checkAvailableDriver()
+static int checkAvailableDriver()
 {
     auto_mcpwm_group = -1; // restore to default
     // find mcpwm
@@ -187,7 +187,7 @@ int checkAvailableDriver()
     return 0;
 }
 
-void setMcpwmGroupUsed(int group_id)
+static void setMcpwmGroupUsed(int group_id)
 {
     for (auto &kvp : HardwareResource) {
         if (kvp.first == DriverMode::mcpwm) {
@@ -199,7 +199,7 @@ void setMcpwmGroupUsed(int group_id)
     }
 }
 
-void setMcpwmGroupUnUsed(int group_id)
+static void setMcpwmGroupUnUsed(int group_id)
 {
     for (auto &kvp : HardwareResource) {
         if (kvp.first == DriverMode::mcpwm) {
@@ -211,7 +211,7 @@ void setMcpwmGroupUnUsed(int group_id)
     }
 }
 
-void setLedcChannelUsed(std::vector<int> ledc_channels)
+static void setLedcChannelUsed(std::vector<int> ledc_channels)
 {
     for (auto channel : ledc_channels) {
         for (auto &kvp : HardwareResource) {
@@ -225,7 +225,7 @@ void setLedcChannelUsed(std::vector<int> ledc_channels)
     }
 }
 
-void setLedcChannelUnUsed(std::vector<int> ledc_channels)
+static void setLedcChannelUnUsed(std::vector<int> ledc_channels)
 {
     for (auto channel : ledc_channels) {
         for (auto &kvp : HardwareResource) {

@@ -1,2 +1,3 @@
 test_apps/build
 test_apps/managed_components
+.vscode/*
