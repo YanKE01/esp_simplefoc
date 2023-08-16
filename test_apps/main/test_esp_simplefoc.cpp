@@ -137,7 +137,7 @@ TEST_CASE("test esp_simplefoc position control", "[single motor][position][14pp]
     driver.init(); // enable 3pwm driver, system automatically selects the idle driver.
     motor.linkDriver(&driver);
     motor.controller = MotionControlType::angle; // set position control mode
-
+    
     // set velocity pid
     motor.PID_velocity.P = 0.9f;
     motor.PID_velocity.I = 2.2f;
