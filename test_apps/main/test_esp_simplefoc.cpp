@@ -137,7 +137,7 @@ TEST_CASE("test esp_simplefoc position control", "[single motor][position][14pp]
     driver.init(); // enable 3pwm driver, system automatically selects the idle driver.
     motor.linkDriver(&driver);
     motor.controller = MotionControlType::angle; // set position control mode
-    
+
     // set velocity pid
     motor.PID_velocity.P = 0.9f;
     motor.PID_velocity.I = 2.2f;
@@ -445,12 +445,15 @@ TEST_CASE("test esp_simplefoc position control", "[two motors][position][7pp][au
     }
 }
 
-TEST_CASE("test 6pwm mode", "test")
+TEST_CASE("test sensor", "[sensor][as5600]")
 {
-    BLDCDriver6PWM driver = BLDCDriver6PWM(10, 11, 12, 13, 15, 16);
-    driver.init();
-    driver.halPwmWrite();
-    driver.deinit();
+    AS5600 as5600(I2C_NUM_0, GPIO_NUM_13, GPIO_NUM_14);
+    as5600.init();
+    for (int i = 0; i < 10; ++i) {
+        ESP_LOGI(TAG, "angle:%.2f", as5600.getSensorAngle());
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+    as5600.deinit();
 }
 
 extern "C" void app_main(void)

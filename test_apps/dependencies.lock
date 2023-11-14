@@ -1,10 +1,10 @@
 dependencies:
   espressif/arduino-foc:
-    component_hash: c3f7b8bf2d58ee18442083314b27684750481f39bd1c0527fe00065fd23faba6
+    component_hash: fdcd066ccd0994246c8091d88525894dd62fcaba6c9d155334b838b2ec58bcb3
     source:
       service_url: https://api.components.espressif.com/
       type: service
-    version: 2.3.0~1
+    version: 2.3.0~2
   espressif/iqmath:
     component_hash: 407d5bc3fd358a73d2b09982918ab508b4e804cc547942c5979d226be86b7e75
     source:
@@ -15,7 +15,7 @@ dependencies:
     component_hash: null
     source:
       type: idf
-    version: 5.2.0
-manifest_hash: e38bcaf96cfdbf8c74f3c16ed543821f734d9f31866416e3c8b8cb6802be2ce4
+    version: 5.3.0
+manifest_hash: aa3b2c38adaa336d0cf8b99ebd66735e9be4a2a1049146899431ca13e21c8ed8
 target: esp32s3
 version: 1.0.0

@@ -6,7 +6,8 @@ set(SRC_FILES
     "port/esp/esp_hal_bldc_6pwm.cpp"
     "port/esp/esp_app_fmath.cpp"
     "port/esp/esp_app_print.cpp"
-    "port/angle_sensor/sensor_as5600.c")
+    "port/angle_sensor/sensor_as5600.c"
+    "port/angle_sensor/as5600.cpp")
 
 set(INC_FILES "port/esp/include/" "port/angle_sensor")
 set(IGNORE_FILES
